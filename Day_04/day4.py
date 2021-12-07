@@ -14,36 +14,30 @@ def board_has_bingo(board):
 			return 1
 	return 0
 
-def is_bingo(all_boards):
-	# for one_board in all_boards:
-	# 	print("new board")
-	# 	for testrow in one_board:
-	# 		print(testrow)
-	# print()
-	hor_sum = 0
-	vert_sum = 0
-	board_num = 0
-	for board in all_boards:
-		if board_has_bingo(board):
-			print("BOARD NUM: ", board_num)
-			return board_num
-		board_num += 1
-	return -1
-
-def not_bingo_board(all_boards):
+def count_bingo(all_boards):
 	count = 0
 	for board in all_boards:
 		if board_has_bingo(board):
 			count += 1
-		if count == 99:
-			return board
-	return -1
+	return count
 
-def all_boards_bingo(all_boards):
+def find_last_board(all_boards):
 	for board in all_boards:
 		if board_has_bingo(board) == 0:
-			return 0
-	return 1
+			return board
+
+# def is_bingo(all_boards, winning_boards):
+# 	hor_sum = 0
+# 	vert_sum = 0
+# 	board_num = 0
+# 	for board in all_boards:
+# 		if board_has_bingo(board) and board not in winning_boards:
+# 			winning_boards.append(board_num)
+# 			print("BOARD NUM: ", board_num)
+# 			# return board_num
+# 		board_num += 1
+# 	return winning_boards
+
 
 def calc_result(board):
 	total = 0
@@ -76,12 +70,12 @@ while j < len_boards:
 		one_board.append(numbers)
 	all_boards.append(one_board)
 	j += 6
-# print(all_boards)
 
-i_balls = 0
 i_boards = 0
 i_rows = 0
 i_numbers = 0
+bingo_count = 0
+last_board = []
 for ball in balls:
 	i_boards = 0
 	i_rows = 0
@@ -97,29 +91,35 @@ for ball in balls:
 				i_numbers += 1
 			i_rows += 1
 		i_boards += 1
-		# if all_boards_bingo(all_boards):
-		# 	print("all boards bingo!")
-		# 	total = calc_result(all_boards[board_num])
-		# 	print("\nboard num: ", board_num)
-		# 	print("winning board: ", all_boards[board_num])
-		# 	print("winning_num:   ", ball)
-		# 	final_result = total * ball
-		# 	print("final result: ", final_result)
-		# 	exit()
-
-	board_num = is_bingo(all_boards)
-	if board_num != -1:
-		total = calc_result(all_boards[board_num])
-		print("\nboard num: ", board_num)
-		print("winning board: ", all_boards[board_num])
+	bingo_count = count_bingo(all_boards)
+	if bingo_count == 99:
+		last_board = find_last_board(all_boards)
+	if bingo_count == 100:
+		total = calc_result(last_board)	
+		print("winning board: ", last_board)
 		print("winning_num:   ", ball)
 		final_result = total * ball
 		print("final result: ", final_result)
-
-		# del all_boards[board_num]
 		exit()
 
-	i_balls += 1
+	# board_num = is_bingo(all_boards)
+	# winning_boards = is_bingo(all_boards, winning_boards)
+	# print("\n\nWINNING BOARDS: ")
+
+	# for winning_board in winning_boards:
+	# 	bingo_count += 1
+	# 	print("\nbingo count: ", bingo_count)
+	# 	total = calc_result(all_boards[winning_board])
+	# 	# print("\nboard num: ", board_num)
+	# 	print("winning board: ", all_boards[winning_board])
+	# 	print("winning_num:   ", ball)
+	# 	final_result = total * ball
+	# 	print("final result: ", final_result)
+	# 	print("len win boards: ", len(winning_boards))
+	# 	if len(winning_boards) >= 100:
+	# 		exit()
+
+
 
 # print("winning_num:   ", 10)
 # total = calc_result(all_boards[90])
