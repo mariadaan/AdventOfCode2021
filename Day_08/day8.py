@@ -15,21 +15,25 @@ def load_data(filename):
 
 @dataclass
 class Display:
-	"""Contains list of 10 signal patterns and 4 digit output values"""
-	patterns: list
-	outputs: list
-	dig_lens: list
+	"""Contains list of 10 signal pattern and 4 digit output values"""
+	pattern: list
+	pattern_lens: list
+	output_chars: list
+	output_chars_lens: list
 
 def create_displays(input):
 	displays = []
-	dig_lens = []
 	for line in input:
 		parts = line.split(" | ")
-		parts[0] = parts[0].split(" ")
-		parts[1] = parts[1].split(" ")
-		for string in parts[1]:
-			dig_lens.append(len(string))
-		d = Display(parts[0], parts[1], dig_lens)
+		pattern = parts[0].split(" ")
+		pattern_lens = []
+		output_chars = parts[1].split(" ")
+		output_chars_lens = []
+		for string in pattern:
+			pattern_lens.append(len(string))
+		for string in output_chars:
+			output_chars_lens.append(len(string))
+		d = Display(pattern, pattern_lens, output_chars, output_chars_lens)
 		displays.append(d)
 	return displays
 
@@ -40,42 +44,72 @@ def count_1478(lengths):
 	# 8 = 7 wires
 	return (lengths.count(2) + lengths.count(4) + lengths.count(3) + lengths.count(7))
 
-def get_digits(outputs):
-	for index, item in enumerate(outputs):
-		if (len(item) == 2): # 1 = 2 wires
-			outputs[index] = '1'
-		elif (len(item) == 4): # 4 = 4 wires
-			outputs[index] = '4'
-		elif (len(item) == 3): # 7 = 3 wires
-			outputs[index] = '7'
-		elif (len(item) == 7): # 8 = 7 wires
-			outputs[index] = '8'
-		elif (len(item) == 5): # 2, 3, 4 = 5 wires
-			if 'e' in item: # 5 = defbc
-				outputs[index] = '5' 
-			elif 'b'in item: # 3 = dafbc
-				outputs[index] = '3'
-			else: # 2 = dafgc
-				outputs[index] = '2'
-		elif (len(item) == 6):
-			if 'g' not in item: # 9 = fdcagb
-				outputs[index] = '9'
-			elif 'a' in item: # 0 = cagedb
-				outputs[index] = '0'
+def sort_string(string):
+	sorted_chars = sorted(string)
+	string = "".join(sorted_chars)
+	return string
+
+def sort_input(displays):
+	for display in displays:
+		for index, item in enumerate(display.pattern):
+			display.pattern[index] = sort_string(display.pattern[index])
+		for index, item in enumerate(display.output_chars):
+			display.output_chars[index] = sort_string(display.output_chars[index])
+
+def contains_all(str, set):
+	""" returns 1 if all chars in set are in str """
+	for c in set:
+		if c not in str: return 0
+	return 1
+
+def get_key(val, connections):
+	for key, value in connections.items():
+		 if val == value:
+			 return key
+	return "key doesn't exist"
+
+def config_pattern(pattern, pattern_lens):
+	connections = {}
+	connections[1] = pattern[pattern_lens.index(2)]
+	connections[4] = pattern[pattern_lens.index(4)]
+	connections[7] = pattern[pattern_lens.index(3)]
+	connections[8] = pattern[pattern_lens.index(7)]
+
+	for index, wires in enumerate(pattern_lens):
+		if wires == 5:
+			if contains_all(pattern[index], connections.get(1)):
+				connections[3] = pattern[index]
+		if wires == 6:
+			if contains_all(pattern[index], connections.get(7)) and contains_all(pattern[index], connections.get(4)):
+				connections[9] = pattern[index]
+			elif contains_all(pattern[index], connections.get(7)):
+				connections[0] = pattern[index]
 			else:
-				outputs[index] = '6'
-	outputs = int("".join(outputs))
-	return outputs
+				connections[6] = pattern[index]
+	for index, wires in enumerate(pattern_lens):
+		if wires == 5:
+			if contains_all(connections.get(6), pattern[index]):
+				connections[5] = pattern[index]
+			elif not contains_all(pattern[index], connections.get(1)):
+				connections[2] = pattern[index]
+	return (connections)
+
+def decypher(display, connections):
+	output_values = ""
+	for chars in display.output_chars:
+		value = get_key(chars, connections)
+		output_values = output_values + str(value)
+	return output_values
+
 
 if __name__ == '__main__':
-	raw_data = load_data("sample.txt")
+	raw_data = load_data("input.txt")
 	displays = create_displays(raw_data)
-	result_1 = count_1478(displays[-1].dig_lens)
-	print("result 1: ", result_1)
-
+	sort_input(displays)
 	all_digits = []
 	for display in displays:
-		real_digits = get_digits(display.outputs)
-		all_digits.append(real_digits)
-	print_2D(all_digits)
+		connections = config_pattern(display.pattern, display.pattern_lens)
+		output_values = decypher(display, connections)
+		all_digits.append(int(output_values))
 	print("result 2: ", sum(all_digits))
+
