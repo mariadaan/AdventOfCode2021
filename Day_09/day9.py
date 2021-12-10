@@ -1,26 +1,18 @@
-from dataclasses import dataclass
 import math
 
 def print_2D(double_array):
+	""" Print 2D array """
 	for row in double_array:
 		print(row)
 
 def load_data(filename):
-	"""
-	Loads data as 2d int array
-	"""
+	""" Loads data as 2d int array """
 	file = open(filename, 'r')
 	data = file.read().splitlines()
 	for index, line in enumerate(data):
 		data[index] = list(line)
 		data[index] = [int(x) for x in data[index]]
 	return data
-
-@dataclass
-class Coordinate:
-	"""Class for keeping track of lines start and end point."""
-	x: int
-	y: int
 
 def add_borders(grid, pad):
 	""" Add a padding around the whole grid """
@@ -36,7 +28,7 @@ def add_borders(grid, pad):
 	return grid
 
 def get_basin_size(grid, x, y, size = 0):
-	middle = grid[y][x]
+	""" Get the size of a basin """
 	grid[y][x] = 9
 	if grid[y][x - 1] != 9:
 		size += get_basin_size(grid, x - 1, y)
@@ -48,11 +40,10 @@ def get_basin_size(grid, x, y, size = 0):
 		size += get_basin_size(grid, x, y - 1)
 	return size + 1
 
-def lowpoint_score(grid):
-	""" Find low points """
+def find_basins(grid):
+	""" Calculate sum of low points and basin sizes"""
 	sizes = []
 	total_res = 0
-	size = 0
 	grid_height = len(grid) - 1
 	grid_width = len(grid[0]) - 1
 	for i_row in range(1, grid_height):
@@ -71,7 +62,7 @@ def lowpoint_score(grid):
 if __name__ == "__main__":
 	vents = load_data("input.txt")
 	add_borders(vents, 9)
-	result = lowpoint_score(vents)
+	result = find_basins(vents)
 	score = result[0]
 	sizes = sorted(result[1])[-3:]
 	print("score: ", score)
