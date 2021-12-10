@@ -1,3 +1,6 @@
+from dataclasses import dataclass
+import math
+
 def print_2D(double_array):
 	for row in double_array:
 		print(row)
@@ -13,21 +16,43 @@ def load_data(filename):
 		data[index] = [int(x) for x in data[index]]
 	return data
 
-def add_borders(grid):
-	""" Add a 10 around the whole grid """
+@dataclass
+class Coordinate:
+	"""Class for keeping track of lines start and end point."""
+	x: int
+	y: int
+
+def add_borders(grid, pad):
+	""" Add a padding around the whole grid """
+	grid
 	grid_height = len(grid)
 	n = len(grid[0]) + 2
-	top_bottom = [10] * n
+	top_bottom = [pad] * n
 	for i in range(grid_height):
-		grid[i].insert(0, 10)
-		grid[i].append(10)
+		grid[i].insert(0, pad)
+		grid[i].append(pad)
 	grid.insert(0,top_bottom)
 	grid.append(top_bottom)
 	return grid
 
+def get_basin_size(grid, x, y, size = 0):
+	middle = grid[y][x]
+	grid[y][x] = 9
+	if grid[y][x - 1] != 9:
+		size += get_basin_size(grid, x - 1, y)
+	if grid[y][x + 1] != 9:
+		size += get_basin_size(grid, x + 1, y)
+	if grid[y + 1][x] != 9:
+		size += get_basin_size(grid, x, y + 1)
+	if grid[y - 1][x] != 9:
+		size += get_basin_size(grid, x, y - 1)
+	return size + 1
+
 def lowpoint_score(grid):
 	""" Find low points """
+	sizes = []
 	total_res = 0
+	size = 0
 	grid_height = len(grid) - 1
 	grid_width = len(grid[0]) - 1
 	for i_row in range(1, grid_height):
@@ -37,16 +62,19 @@ def lowpoint_score(grid):
 			right = grid[i_row][i_num + 1]
 			down = grid[i_row + 1][i_num]
 			up = grid[i_row - 1][i_num]
-			# print(f"\n  {up}  ")
-			# print(f"{left} {middle} {right}")
-			# print(f"  {down}  ")
 			if middle<left and middle<right and middle<up and middle<down and middle<up and middle<down:
+				size = get_basin_size(grid, i_num, i_row)
+				sizes.append(size)
 				total_res += middle + 1
-	return total_res
+	return total_res, sizes
 
 if __name__ == "__main__":
 	vents = load_data("input.txt")
-	add_borders(vents)
-	score = lowpoint_score(vents)
-	# print_2D(vents)
+	add_borders(vents, 9)
+	result = lowpoint_score(vents)
+	score = result[0]
+	sizes = sorted(result[1])[-3:]
 	print("score: ", score)
+	print("sizes: ", math.prod(sizes))
+
+
