@@ -37,7 +37,7 @@ def pass_day(fishies):
 
 def calc_fishamount(fishies, days):
 	counted_fishies = [fishies.count(i) for i in range(9)]
-	for day in range(days):
+	for _ in range(days):
 		spawned_count = counted_fishies[0]
 		counted_fishies[:-1] = counted_fishies[1:]
 		counted_fishies[6] += spawned_count
