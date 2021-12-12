@@ -40,29 +40,17 @@ def reverse_strings(chunks):
 		reversed.append(row)
 	return reversed
 
-def remove_extras(chunks):
-	stripped = chunks
-	sets = ['>', '}', ']', ')']
-	for row in chunks:
-		if set_in_str(row, sets):
-			stripped.remove(row)
-	return stripped
-
-
 def find_errors(chunks):
 	only_incompletes = chunks.copy()
 	illegal_chars = []
 	closers = ">}])"
 	for row in chunks:
-		# print("row: ", row)
 		for char in row:
 			if char in closers:
 				illegal_chars.append(char)
 				only_incompletes.remove(row)
 				break
-	# only_incompletes = remove_extras(only_incompletes)
 	missing_part = reverse_strings(only_incompletes)
-	# print(illegal_chars)
 	return illegal_chars, missing_part
 
 def get_scores_1(chars):
