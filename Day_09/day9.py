@@ -16,7 +16,6 @@ def load_data(filename):
 
 def add_borders(grid, pad):
 	""" Add a padding around the whole grid """
-	grid
 	grid_height = len(grid)
 	n = len(grid[0]) + 2
 	top_bottom = [pad] * n
