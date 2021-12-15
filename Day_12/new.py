@@ -1,11 +1,10 @@
-from collections import defaultdict, deque
-from pprint import pprint
+from collections import defaultdict
 
 def load_data(filename):
 	""" 
 	Load data as 2d array
 	"""
-	with open("minisample.txt") as file:
+	with open(filename) as file:
 		raw_data = file.read().strip()
 	data = [row.split("-") for row in raw_data.split("\n")]
 	return data
@@ -34,27 +33,35 @@ def create_dict(data):
 		connections[b].append(a)
 	return connections
 
-
-
-def dfs(visited, graph, cave):
-	
-	paths = 0
+def dfs(visited, neighbours, cave, first = 0):
+	"""
+	Depth-first search: algorithm for tree traversal on graph or tree data structures.
+	"""
+	global paths
 
 	if cave == "end":
 		paths += 1
 		return
-	for neighbour in graph[cave]:
+	if cave in visited and cave.islower():
+		return
+	if cave.islower():
+		visited.add(cave) 
+	for next_cave in neighbours[cave]:
 		# dont go back to start
-		if neighbour == "start" or (cave.islower() and cave in visited) or cave.isupper():
-			print("test")
-			visited.append(cave)
-			visited = dfs(visited, graph, neighbour)
-	print(paths)
-	return visited
+		if next_cave == "start":
+			continue
+		dfs(visited, neighbours, next_cave)
+	if cave.islower():
+		visited.remove(cave)
+	return
 
 if __name__ == "__main__":
-	data = load_data("minisample.txt")
+	global paths
+	paths = 0
+	data = load_data("input.txt")
 	connections = create_dict(data)
+	# print(dict(connections))
+	# print()
 	visited = set()
-	visited = dfs(visited, connections, "start")
-	print(visited)
+	dfs(visited, connections, "start", 1)
+	print(paths)
