@@ -33,7 +33,7 @@ def create_dict(data):
 		connections[b].append(a)
 	return connections
 
-def dfs(visited, neighbours, cave, first = 0):
+def dfs(visited, neighbours, cave):
 	"""
 	Depth-first search: algorithm for tree traversal on graph or tree data structures.
 	"""
@@ -50,18 +50,63 @@ def dfs(visited, neighbours, cave, first = 0):
 		# dont go back to start
 		if next_cave == "start":
 			continue
+		# keep going to next cave with recursion, until "end" is reached
 		dfs(visited, neighbours, next_cave)
+	# remove last visited cave in current path from visited set when stepping back in recursion depth
 	if cave.islower():
 		visited.remove(cave)
 	return
 
+def has_duplicates(lst):
+	""" Check if given list contains any duplicates """
+	if len(lst) == len(set(lst)):
+		return False
+	else:
+		return True
+
+
+def dfs2(visited, neighbours, cave):
+	"""
+	Depth-first search: algorithm for tree traversal on graph or tree data structures.
+	"""
+	global paths
+
+	if cave == "end":
+		paths += 1
+		return
+	if has_duplicates(visited) and cave.islower():
+		return
+	if cave.islower():
+		visited.append(cave) 
+	for next_cave in neighbours[cave]:
+		# dont go back to start
+		if next_cave == "start":
+			continue
+		# keep going to next cave with recursion, until "end" is reached
+		dfs2(visited, neighbours, next_cave)
+	# remove last visited cave in current path from visited set when stepping back in recursion depth
+	if cave.islower():
+		visited.remove(cave)
+	# print(paths)
+	return
+
+
 if __name__ == "__main__":
 	global paths
 	paths = 0
-	data = load_data("input.txt")
+	data = load_data("minisample.txt")
+	#print(data)
 	connections = create_dict(data)
-	# print(dict(connections))
-	# print()
+	print(connections)
+
+	# part 1
 	visited = set()
-	dfs(visited, connections, "start", 1)
+	dfs(visited, connections, "start")
+	print(paths)
+
+	# part 2
+	paths = 0
+	visited = []
+	dfs2(visited, connections, "start")
+	print()
 	print(paths)
