@@ -60,11 +60,11 @@ def createaa_paths(uniques, connections, big_caves, small_caves):
 					continue
 				new_path.append(point)
 				all_paths.append(new_path)
-	# correct_paths = []
-	# for row in all_paths:
-	# 	if row[-1] == 'end':
-	# 		correct_paths.append(row)
-	# all_paths.clear()
+	correct_paths = []
+	for row in all_paths:
+		if row[-1] == 'end':
+			correct_paths.append(row)
+	all_paths.clear()
 	print_2D(all_paths)
 	new_list = remove_duplicates(all_paths)
 	return new_list
@@ -124,12 +124,12 @@ def get_caves(uniques):
 
 
 if __name__ == "__main__":
-	result = load_data("input.txt")
+	result = load_data("minisample.txt")
 	connections = result[0]
 	uniques = result[1]
 	result = get_caves(uniques)
 	small_caves = result[0]
 	big_caves = result[1]
-	paths = create_paths(uniques, connections, big_caves, small_caves)
+	paths = createaa_paths(uniques, connections, big_caves, small_caves)
 	# print_2D(paths)
 	print(len(paths))
