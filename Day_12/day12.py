@@ -1,135 +1,67 @@
-from itertools import product
-import re
-
-def print_2D(double_array):
-	""" Print 2D array """
-	for row in double_array:
-		print(row)
+from collections import defaultdict
 
 def load_data(filename):
-	""" Loads data as 2d array """
-	file = open(filename, 'r')
-	data = file.read().splitlines()
-	uniques = []
-	for index, row in enumerate(data):
-		data[index] = row.split('-')
-		for elem in data[index]:
-			if elem not in uniques:
-				uniques.append(elem)
-		data[index] = tuple(data[index])
-	uniques.insert(0, uniques.pop(uniques.index("start")))
-	uniques.append(uniques.pop(uniques.index("end")))
-	return data, uniques
+	""" 
+	Load data as 2d array
+	"""
+	with open(filename) as file:
+		raw_data = file.read().strip()
+	data = [row.split("-") for row in raw_data.split("\n")]
+	return data
 
-def find_other(tupleset, value):
-	other = 0
-	try :
-		pos = tupleset.index(value)
-		if pos == 0:
-			other = tupleset[1]
-		elif pos == 1:
-			other = tupleset[0]
-	except ValueError:
-		return 0
-	return other
+def create_dict(data):
+	"""
+	in: 2D array in format
+		[['start', 'A'], ['start', 'b']]
+	out: Dict to act as an adjacency list in format
+		{'start':	['A', 'b'],
+		'A'	 		['start', 'c', 'b', 'end'],
+		'b':		['start', 'A', 'd', 'end'],
+		'c':		['A'], 'd': ['b'],
+		'end':		['A', 'b']}
+	 """
+	connections = defaultdict(list)
+	for a, b in data:
+		# punt a is de naam van het punt, 
+		# b is waar je naartoe kan vanaf punt a
+		# maak met connections[a] nieuw element in dict met key a
+		# voeg met .append(b) connected punt toe aan lijst van values die bij key a horen
+		# als connection[a] al bestaat wordt er geen nieuw element met key a aangemaakt,
+		# maar wordt nog een bestemming toegevoegd aan de connections met dat punt
+		# andersom ook toevoegen want de connecties werken twee richtingen op
+		connections[a].append(b)
+		connections[b].append(a)
+	return connections
 
-def find_nexts(connections, value):
-	next_points = []
-	for con in connections:
-		other = find_other(con, value)
-		if other:
-			next_points.append(other)
-	return next_points
+def dfs(visited, neighbours, cave, first = 0):
+	"""
+	Depth-first search: algorithm for tree traversal on graph or tree data structures.
+	"""
+	global paths
 
-def remove_duplicates(all_paths):
-	new_paths = []
-	for path in all_paths:
-		new_paths.append(",".join(path))
-	# print(new_paths)
-	return list(dict.fromkeys(new_paths))
-
-def createaa_paths(uniques, connections, big_caves, small_caves):
-	all_paths = [["start"]]
-	path_len = len(uniques)
-	for i in range(path_len):
-		for index in range(len(all_paths)):
-			next_points = find_nexts(connections, all_paths[index][-1])
-			for point in next_points:
-				new_path = all_paths[index].copy()
-				if point == "end" or (point in small_caves and point in new_path):
-					continue
-				new_path.append(point)
-				all_paths.append(new_path)
-	correct_paths = []
-	for row in all_paths:
-		if row[-1] == 'end':
-			correct_paths.append(row)
-	all_paths.clear()
-	print_2D(all_paths)
-	new_list = remove_duplicates(all_paths)
-	return new_list
-
-def create_paths(uniques, connections, big_caves, small_caves):
-	all_paths = [["start"]]
-	path_len = len(uniques) + 3
-	for i in range(path_len):
-		for index in range(len(all_paths)):
-			next_points = find_nexts(connections, all_paths[index][-1])
-			for point in next_points:
-				new_path = all_paths[index].copy()
-				if point == "end" or (point in small_caves and point in new_path):
-					continue
-				new_path.append(point)
-				all_paths.append(new_path)
-	new_list = remove_duplicates(all_paths)
-	correct_paths = []
-	end_points = find_nexts(connections, "end")
-	for path in new_list:
-		if path[-2:] in end_points:
-			correct_paths.append(path + ",end")
-	return correct_paths
-
-# def create_paths(uniques, connections, big_caves, small_caves):
-# 	all_paths = ["start,"]
-# 	path_len = len(uniques)
-# 	for i in range(path_len):
-# 		for index in range(len(all_paths)):
-# 			last = all_paths[index].rsplit(',', 1)[1]
-# 			print(last)
-# 			next_points = find_nexts(connections, last)
-# 			print(next_points)
-# 			for point in next_points:
-# 				new_path = all_paths[index]
-# 				if point in small_caves and point in new_path:
-# 					continue
-# 				new_path = new_path + ',' + point
-# 				all_paths.append(new_path)
-# 	# correct_paths = []
-# 	# for row in all_paths:
-# 	# 	if row[-1] == 'end':
-# 	# 		correct_paths.append(row)
-# 	# new_list = remove_duplicates(correct_paths)
-# 	# return new_list
-# 	return all_paths
-
-def get_caves(uniques):
-	small_caves = []
-	big_caves = []
-	for cave in uniques:
-		if cave.islower():
-			small_caves.append(cave)
-		else:
-			big_caves.append(cave)
-	return small_caves, big_caves
-
+	if cave == "end":
+		paths += 1
+		return
+	if cave in visited and cave.islower():
+		return
+	if cave.islower():
+		visited.add(cave) 
+	for next_cave in neighbours[cave]:
+		# dont go back to start
+		if next_cave == "start":
+			continue
+		dfs(visited, neighbours, next_cave)
+	if cave.islower():
+		visited.remove(cave)
+	return
 
 if __name__ == "__main__":
-	result = load_data("minisample.txt")
-	connections = result[0]
-	uniques = result[1]
-	result = get_caves(uniques)
-	small_caves = result[0]
-	big_caves = result[1]
-	paths = createaa_paths(uniques, connections, big_caves, small_caves)
-	# print_2D(paths)
-	print(len(paths))
+	global paths
+	paths = 0
+	data = load_data("input.txt")
+	connections = create_dict(data)
+	# print(dict(connections))
+	# print()
+	visited = set()
+	dfs(visited, connections, "start", 1)
+	print(paths)
