@@ -57,36 +57,25 @@ def dfs(visited, neighbours, cave):
 		visited.remove(cave)
 	return
 
-def has_duplicates(lst):
-	""" Check if given list contains any duplicates """
-	if len(lst) == len(set(lst)):
-		return False
-	else:
-		return True
-
-def find_duplicate(lst):
-	count_item = 0
-	for item in lst:
-		for dup in lst:
-			if item == dup:
-				count_item += 1
-		if count_item > 1:
-			return item
-	return 0
-
 def most_common(lst):
+	"""
+	Find most common item in list
+	"""
 	if len(lst) > 0:
 		return max(set(lst), key=lst.count)
 	else:
 		return 0
 
-def count_item(lst, item):
-	return lst.count(item)
-
-# check if one of the items is in the list 2 times
 def check_counts(lst, cave):
+	"""
+	Return True:
+	- when cave is present 1 time and other small cave is present 2 times
+	- when cave is present 2 times
+	"""
+	if lst.count(cave) == 2:
+		return True
 	item = most_common(lst)
-	common_count = count_item(lst, item)
+	common_count = lst.count(item)
 	if lst.count(cave) == 1 and common_count == 2:
 		return True
 	else:
@@ -101,7 +90,7 @@ def dfs2(visited, neighbours, cave):
 	if cave == "end":
 		paths += 1
 		return
-	if visited.count(cave) == 2 or check_counts(visited, cave):
+	if check_counts(visited, cave):
 		return
 	if cave.islower():
 		visited.append(cave) 
@@ -121,18 +110,15 @@ if __name__ == "__main__":
 	global paths
 	paths = 0
 	data = load_data("input.txt")
-	#print(data)
 	connections = create_dict(data)
-	# print(connections)
 
 	# part 1
 	visited = set()
 	dfs(visited, connections, "start")
-	print(paths)
+	print("part 1: ", paths)
 
 	# part 2
 	paths = 0
 	visited = []
 	dfs2(visited, connections, "start")
-	print()
-	print(paths)
+	print("part 2: ", paths)
