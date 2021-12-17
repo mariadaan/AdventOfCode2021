@@ -64,6 +64,33 @@ def has_duplicates(lst):
 	else:
 		return True
 
+def find_duplicate(lst):
+	count_item = 0
+	for item in lst:
+		for dup in lst:
+			if item == dup:
+				count_item += 1
+		if count_item > 1:
+			return item
+	return 0
+
+def most_common(lst):
+	if len(lst) > 0:
+		return max(set(lst), key=lst.count)
+	else:
+		return 0
+
+def count_item(lst, item):
+	return lst.count(item)
+
+# check if one of the items is in the list 2 times
+def check_counts(lst, cave):
+	item = most_common(lst)
+	common_count = count_item(lst, item)
+	if lst.count(cave) == 1 and common_count == 2:
+		return True
+	else:
+		return False
 
 def dfs2(visited, neighbours, cave):
 	"""
@@ -74,7 +101,7 @@ def dfs2(visited, neighbours, cave):
 	if cave == "end":
 		paths += 1
 		return
-	if has_duplicates(visited) and cave.islower():
+	if visited.count(cave) == 2 or check_counts(visited, cave):
 		return
 	if cave.islower():
 		visited.append(cave) 
@@ -87,17 +114,16 @@ def dfs2(visited, neighbours, cave):
 	# remove last visited cave in current path from visited set when stepping back in recursion depth
 	if cave.islower():
 		visited.remove(cave)
-	# print(paths)
 	return
 
 
 if __name__ == "__main__":
 	global paths
 	paths = 0
-	data = load_data("minisample.txt")
+	data = load_data("input.txt")
 	#print(data)
 	connections = create_dict(data)
-	print(connections)
+	# print(connections)
 
 	# part 1
 	visited = set()
